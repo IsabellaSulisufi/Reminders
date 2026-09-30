@@ -10,7 +10,7 @@ import SwiftUI
 struct PickerFieldView: View {
     let label: String
     let value: String
-    
+
     var body: some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 8) {
@@ -37,4 +37,3 @@ struct PickerFieldView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }
-

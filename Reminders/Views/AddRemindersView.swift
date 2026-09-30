@@ -9,13 +9,11 @@ import SwiftUI
 
 struct AddReminderView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = ReminderViewModel()
-
+    @EnvironmentObject var viewModel: ReminderViewModel
+    @State private var showError = false
+    @State private var navigateToHome = false
     @State private var dateViewOpen = false
     @State private var timeViewOpen = false
-    @State private var taskName: String = ""
-    @State private var date: Date = .now
-    @State private var time: Date = .now
 
     var body: some View {
         NavigationStack {
@@ -31,7 +29,7 @@ struct AddReminderView: View {
                         .tracking(0.5)
                         .foregroundStyle(Color.secondaryText)
 
-                    TextField("Pick up dry cleaning", text: $taskName)
+                    TextField("Pick up dry cleaning", text: $viewModel.reminderTitle)
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(Color.primaryText)
                 }
@@ -41,55 +39,84 @@ struct AddReminderView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
 
                 // Date / time picker
-                VStack {
-                    // Date Picker
+                VStack(spacing: 25) {
+                    // Date picker
                     Button {
                         dateViewOpen.toggle()
                     } label: {
                         PickerFieldView(
                             label: "DATE",
-                            value: date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+                            value: viewModel.dueDateAndTime.formatted(
+                                .dateTime
+                                    .weekday(.abbreviated)
+                                    .day()
+                                    .month(.abbreviated)
+                            )
                         )
                     }
+
                     if dateViewOpen {
-                        Divider()
-                        DatePicker("", selection: $date, in: Date.now..., displayedComponents: .date)
-                            .datePickerStyle(.graphical)
-                            .padding(.horizontal, 8)
-                            .onChange(of: date) { dateViewOpen = false }
-                    }
-                }
-                
-                // Time Picker
-                Button {
-                    timeViewOpen.toggle()
-                } label: {
-                    PickerFieldView(
-                        label: "TIME",
-                        value: time.formatted(.dateTime.hour().minute())
-                    )
-                }
-                if timeViewOpen {
-                    Divider()
-                    DatePicker("", selection: $time, in: Date.now..., displayedComponents: .hourAndMinute)
+                        DatePicker("", selection: $viewModel.dueDateAndTime, in: Date.now..., displayedComponents: .date
+                        )
                         .datePickerStyle(.graphical)
                         .padding(.horizontal, 8)
-                        .onChange(of: time) { timeViewOpen = false }
+                        .onChange(of: viewModel.dueDateAndTime) {
+                            dateViewOpen = false
+                        }
+                    }
+
+                    // Time Picker
+                    Button {
+                        timeViewOpen.toggle()
+                    } label: {
+                        PickerFieldView(
+                            label: "TIME",
+                            value: viewModel.dueDateAndTime.formatted(.dateTime.hour().minute())
+                        )
+                    }
+
+                    if timeViewOpen {
+                        DatePicker("", selection: $viewModel.dueDateAndTime, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(.wheel)
+                            .padding(.horizontal, 8)
+                            .onChange(of: viewModel.dueDateAndTime) {
+                                timeViewOpen = false
+                            }
+                    }
                 }
+
                 Spacer(minLength: 0)
 
-                // Add button
-                Button {
-                    viewModel.addReminderToList()
-                } label: {
-                    Text("Add Reminder")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.cardRow)
-                        .frame(maxWidth: .infinity)
-                        .padding(17)
-                        .background(Color.primaryCta)
-                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                VStack {
+                    Button {
+                        if viewModel.dueDateAndTime <= Date() {
+                            showError = true
+                        } else {
+                            viewModel.addReminderToList()
+                            viewModel.resetRemindersForm()
+                            navigateToHome = true
+                        }
+                    } label: {
+                        Text("Add Reminder")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color.cardRow)
+                            .frame(maxWidth: .infinity)
+                            .padding(18)
+                            .background(Color.primaryCta)
+                            .clipShape(
+                                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            )
+                    }
                 }
+                .navigationDestination(isPresented: $navigateToHome) {
+                    HomeView()
+                }
+                .alert("Invalid Time", isPresented: $showError) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text("Please select a time in the future.")
+                }
+
             }
             .padding(20)
             .background(Color.background)
