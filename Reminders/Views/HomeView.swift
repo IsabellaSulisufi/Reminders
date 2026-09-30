@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import Combine
 
 struct HomeView: View {
-    @StateObject private var viewModel = ReminderViewModel()
+    @EnvironmentObject var viewModel: ReminderViewModel
+    let now = Date()
 
     var body: some View {
+        let next24Hours = now.addingTimeInterval(24 * 60 * 60)
         NavigationStack {
             VStack {
                 HStack {
@@ -34,40 +37,30 @@ struct HomeView: View {
                 }
                 }
                 .padding(.bottom, 20)
+                if viewModel.reminderList.isEmpty {
+                    Text("No reminders due :D")
+                        .font(.system(size: 16))
+                        .foregroundColor(Color("urgent"))
+                } else {
+                    ForEach(viewModel.reminderList) { reminder in
 
-                
-                HStack {
-                    NavigationLink(destination: AddReminderView()) {
-                        Circle()
-                            .stroke(.dividers, lineWidth: 3)
-                            .frame(width: 25, height: 25)
+                        if reminder.dueDate >= now &&
+                           reminder.dueDate <= next24Hours {
+
+                            UrgentReminderRowView(
+                                reminder: reminder.reminder,
+                                date: reminder.dueDate
+                            )
+
+                        } else {
+
+                            ReminderRowView(
+                                reminder: reminder.reminder,
+                                date: reminder.dueDate
+                            )
+                        }
                     }
-
-                    VStack(alignment: .leading) {
-                        Text("Buy bananas")
-                            .font(.custom("Gill Sans", size: 20))
-                            .foregroundColor(Color.primaryText)
-                            .padding(.bottom, 2)
-
-                        Text(Date.now, format: .dateTime.hour().minute())
-                            .font(.custom("Gill Sans", size: 15))
-                            .foregroundColor(Color.secondaryText)
-                            .padding(.bottom, 6)
-
-                    }
-                    .padding(12)
-                    Spacer()
-
                 }
-                .padding(10)
-                .padding(.leading, 15)
-                .background(Color.cardRow)
-                .cornerRadius(22)
-
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 12)
-//                        .stroke(Color.primaryCta, lineWidth: 1)
-//                )
 
                 Spacer()
             }

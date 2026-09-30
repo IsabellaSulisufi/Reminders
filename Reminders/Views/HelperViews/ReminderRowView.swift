@@ -10,7 +10,7 @@ import SwiftUI
 struct ReminderRowView: View {
     let reminder: String
     let date: Date
-    
+
     var body: some View {
         HStack {
             NavigationLink(destination: AddReminderView()) {
@@ -41,7 +41,6 @@ struct ReminderRowView: View {
         .cornerRadius(22)
     }
 }
-
 
 #Preview {
     ReminderRowView(reminder: "buy bananas", date: Date.now.addingTimeInterval(86400))

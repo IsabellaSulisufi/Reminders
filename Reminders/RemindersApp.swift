@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct RemindersApp: App {
+    @StateObject private var viewModel = ReminderViewModel()
+
     var body: some Scene {
         WindowGroup {
             HomeView()
+                .environmentObject(viewModel)
         }
     }
 }

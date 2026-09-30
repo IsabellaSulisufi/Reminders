@@ -10,7 +10,10 @@ import Combine
 
 class ReminderViewModel: ObservableObject {
     @Published var reminderList: [Reminder] = []
-    
+    @Published var reminderTitle: String = ""
+    @Published var dueDateAndTime: Date = Date()
+    @Published var isReminderComplete: Bool = false
+
     var exampleReminder = Reminder(reminder: "buy bananas", dueDate: Date.distantFuture, timeDue: Date.distantFuture, isCompleted: false)
 
       func emptyAllReminders() {
@@ -20,10 +23,16 @@ class ReminderViewModel: ObservableObject {
 
       func addReminderToList() {
           let newReminder = Reminder(
-            reminder: "", dueDate: Date(), timeDue: Date(), isCompleted: false
+            reminder: reminderTitle, dueDate: dueDateAndTime, timeDue: dueDateAndTime, isCompleted: isReminderComplete
           )
-          
+
           reminderList.append(newReminder)
           print(reminderList)
       }
+
+    func resetRemindersForm() {
+        reminderTitle = ""
+        dueDateAndTime = Date()
+    }
+
 }
