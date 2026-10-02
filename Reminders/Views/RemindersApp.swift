@@ -13,7 +13,7 @@ struct RemindersApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            PushNotificationView()
                 .environmentObject(viewModel)
         }
     }
